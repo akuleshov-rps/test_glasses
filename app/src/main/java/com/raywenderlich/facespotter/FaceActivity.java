@@ -232,7 +232,7 @@ public final class FaceActivity extends AppCompatActivity {
     mCameraSource = new CameraSource.Builder(context, detector)
       .setFacing(facing)
       .setRequestedPreviewSize(800, 600)
-      .setRequestedFps(120.0f)
+      .setRequestedFps(30.0f)
       .setAutoFocusEnabled(true)
       .build();
   }

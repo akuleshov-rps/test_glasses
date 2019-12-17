@@ -66,14 +66,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
   private Paint mEyeOutlinePaint;
   private Paint mEyelidPaint;
 
-  private Drawable mPigNoseGraphic;
-  private Drawable mMustacheGraphic;
-  private Drawable mHappyStarGraphic;
-  private Drawable mHatGraphic;
-  private Drawable mGlassesGraphic;
-
   private Bitmap mGlassesBitmap;
-  private GraphicOverlay mOverlay;
 
   // We want each iris to move independently,
   // so each one gets its own physics engine.
@@ -88,17 +81,11 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     initializePaints(resources);
     initializeGraphics(resources);
 
-    mOverlay = overlay;
     mGlassesBitmap = BitmapFactory.decodeResource(context.getResources(),
             R.drawable.glasses);
   }
 
   private void initializeGraphics(Resources resources) {
-    mPigNoseGraphic = resources.getDrawable(R.drawable.pig_nose_emoji);
-    mMustacheGraphic = resources.getDrawable(R.drawable.mustache);
-    mHappyStarGraphic = resources.getDrawable(R.drawable.happy_star);
-    mHatGraphic = resources.getDrawable(R.drawable.red_hat);
-    mGlassesGraphic = resources.getDrawable(R.drawable.glasses);
   }
 
   private void initializePaints(Resources resources) {
@@ -145,6 +132,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     if (faceData == null) {
       return;
     }
+
     PointF detectPosition = faceData.getPosition();
     PointF detectLeftEyePosition = faceData.getLeftEyePosition();
     PointF detectRightEyePosition = faceData.getRightEyePosition();
@@ -177,36 +165,12 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     float width = scaleX(faceData.getWidth());
     float height = scaleY(faceData.getHeight());
 
+
     // Eye coordinates
     PointF leftEyePosition = new PointF(translateX(detectLeftEyePosition.x),
-                                        translateY(detectLeftEyePosition.y));
+            translateY(detectLeftEyePosition.y));
     PointF rightEyePosition = new PointF(translateX(detectRightEyePosition.x),
-                                         translateY(detectRightEyePosition.y));
-
-    // Eye state
-    boolean leftEyeOpen = faceData.isLeftEyeOpen();
-    boolean rightEyeOpen = faceData.isRightEyeOpen();
-
-    // Nose coordinates
-    PointF noseBasePosition = new PointF(translateX(detectNoseBasePosition.x),
-      translateY(detectNoseBasePosition.y));
-
-    // Mouth coordinates
-    PointF mouthLeftPosition = new PointF(translateX(detectMouthLeftPosition.x),
-      translateY(detectMouthLeftPosition.y));
-    PointF mouthRightPosition = new PointF(translateX(detectMouthRightPosition.x),
-      translateY(detectMouthRightPosition.y));
-    PointF mouthBottomPosition = new PointF(translateX(detectMouthBottomPosition.x),
-      translateY(detectMouthBottomPosition.y));
-
-    // Ear coordinates
-    PointF leftEarPosition = new PointF(translateX(detectLeftEarPosition.x),
-            translateY(detectLeftEarPosition.y));
-    PointF rightEarPosition = new PointF(translateX(detectRightEarPosition.x),
-            translateY(detectRightEarPosition.y));
-
-    // Smile state
-    boolean smiling = faceData.isSmiling();
+            translateY(detectRightEyePosition.y));
 
     // Head tilt
     float eulerY = faceData.getEulerY();
@@ -222,164 +186,49 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     float eyeRadius = EYE_RADIUS_PROPORTION * distance;
     float irisRadius = IRIS_RADIUS_PROPORTION * distance;
 
-    // Draw the eyes.
-//    PointF leftIrisPosition = mLeftPhysics.nextIrisPosition(leftEyePosition, eyeRadius, irisRadius);
-//    drawEye(canvas, leftEyePosition, eyeRadius, leftIrisPosition, irisRadius, leftEyeOpen, smiling);
-//    PointF rightIrisPosition = mRightPhysics.nextIrisPosition(rightEyePosition, eyeRadius, irisRadius);
-//    drawEye(canvas, rightEyePosition, eyeRadius, rightIrisPosition, irisRadius, rightEyeOpen, smiling);
-
     // Draw Glasses.
-    drawGlasses(canvas, leftEyePosition, rightEyePosition, leftEarPosition, rightEarPosition, width, eulerZ);
+    drawGlasses(canvas, leftEyePosition, rightEyePosition, width, eulerZ, eulerY);
 
-//    // Draw the nose.
-//    drawNose(canvas, noseBasePosition, leftEyePosition, rightEyePosition, width);
-//
-    // Draw the mustache.
-//    drawMustache(canvas, noseBasePosition, mouthLeftPosition, mouthRightPosition);
-
-    // Draw the hat only if the subject's head is titled at a
-//    // sufficiently jaunty angle.
-//    final float HEAD_TILT_HAT_THRESHOLD = 20.0f;
-//    if (Math.abs(eulerZ) > HEAD_TILT_HAT_THRESHOLD) {
-//      drawHat(canvas, position, width, height, noseBasePosition);
-//    }
   }
 
-  // Cartoon feature draw routines
-  // =============================
-
-  private void drawEye(Canvas canvas,
-                       PointF eyePosition, float eyeRadius,
-                       PointF irisPosition, float irisRadius,
-                       boolean eyeOpen, boolean smiling) {
-    if (eyeOpen) {
-      canvas.drawCircle(eyePosition.x, eyePosition.y, eyeRadius, mEyeWhitePaint);
-      if (smiling) {
-        mHappyStarGraphic.setBounds(
-          (int)(irisPosition.x - irisRadius),
-          (int)(irisPosition.y - irisRadius),
-          (int)(irisPosition.x + irisRadius),
-          (int)(irisPosition.y + irisRadius));
-        mHappyStarGraphic.draw(canvas);
-      } else {
-        canvas.drawCircle(irisPosition.x, irisPosition.y, irisRadius, mIrisPaint);
-      }
-    } else {
-      canvas.drawCircle(eyePosition.x, eyePosition.y, eyeRadius, mEyelidPaint);
-      float y = eyePosition.y;
-      float start = eyePosition.x - eyeRadius;
-      float end = eyePosition.x + eyeRadius;
-      canvas.drawLine(start, y, end, y, mEyeOutlinePaint);
-    }
-    canvas.drawCircle(eyePosition.x, eyePosition.y, eyeRadius, mEyeOutlinePaint);
-  }
 
   private void drawGlasses(Canvas canvas,
                            PointF rightEyePosition,
                            PointF leftEyePosition,
-                           PointF rightEarPosition,
-                           PointF leftEarPosition,
                            float faceWidth,
-                           float angle) {
-    final float GLASSES_RATIO = (float)mGlassesBitmap.getHeight() / (float)mGlassesBitmap.getWidth();
-    final float GLASSES_FACE_WIDTH_RATIO = (float)(1 / 5.0);
+                           float angle,
+                           float angleY) {
 
-    float glassesWidthSidePadding = faceWidth * GLASSES_FACE_WIDTH_RATIO;
-    float glassesTopPadding = faceWidth * (float)(1 / 10.0);
+    if (Math.abs(angleY) <= 20) {
+      final float GLASSES_RATIO = (float)mGlassesBitmap.getHeight() / (float)mGlassesBitmap.getWidth();
+      final float GLASSES_FACE_WIDTH_RATIO = (float)(1 / 5.0);
 
-//    int left = (int)(leftEyePosition.x - glassesWidthSidePadding);
-//    int right = (int)(rightEyePosition.x + glassesWidthSidePadding);
-//    int top = (int)(leftEyePosition.y - glassesTopPadding);
-//    int bottom = (int)(top + (right - left) * GLASSES_RATIO);
-
-//    float newLeftPadding = (float) (glassesWidthSidePadding * Math.cos(Math.toRadians(angle)));
-//    float newTopPadding = (float) (glassesTopPadding * Math.sin(Math.toRadians(angle)));
-//    float newLeft = leftEyePosition.x - newLeftPadding;
-//    float newRight = rightEarPosition.x + newLeftPadding;
-//    float newTop = leftEyePosition.y - newTopPadding;
-//    float newBottom = (newTop + (newRight - newLeft) * GLASSES_RATIO);
-
-    int left = (int)(leftEyePosition.x);
-    int right = (int)(rightEyePosition.x);
-    int top = (int)(leftEyePosition.y);
-    int bottom = (int)(top + (right - left) * GLASSES_RATIO);
+      float glassesWidthSidePadding = faceWidth * GLASSES_FACE_WIDTH_RATIO;
+      float glassesTopPadding = faceWidth * (float)(1 / 10.0);
 
 
-    double ac = Math.abs(rightEyePosition.y - leftEyePosition.y);
-    double cb = Math.abs(rightEyePosition.x - leftEyePosition.x + + 2 * glassesWidthSidePadding);
-    double glassesWidth = Math.hypot(ac, cb);
-    double glassesHeight= glassesWidth * GLASSES_RATIO;
+      double ac = Math.abs(rightEyePosition.y - leftEyePosition.y);
+      double cb = Math.abs(rightEyePosition.x - leftEyePosition.x + + 2 * glassesWidthSidePadding);
+      double glassesWidth = Math.hypot(ac, cb);
+      double glassesHeight= glassesWidth * GLASSES_RATIO;
 
-    Bitmap scaledBitmap = Bitmap.createScaledBitmap(mGlassesBitmap, (int) glassesWidth, (int) glassesHeight, true);
-//    Bitmap scaledBitmap = Bitmap.createScaledBitmap(mGlassesBitmap, right - left, bottom - top, true);
-    Matrix matrix = new Matrix();
-    matrix.reset();
+      Bitmap scaledBitmap = Bitmap.createScaledBitmap(mGlassesBitmap, (int) glassesWidth, (int) glassesHeight, true);
+      Matrix matrix = new Matrix();
+      matrix.reset();
 
-//    matrix.postRotate(getAngle(rightEyePosition, leftEyePosition));
-    float newLeft = (float) (leftEyePosition.x - glassesWidthSidePadding * Math.cos(Math.toRadians(angle)));
-    float newTop = (float) (leftEyePosition.y - glassesWidthSidePadding * Math.sin(Math.toRadians(angle)));
+      float centerX = rightEyePosition.x - (rightEyePosition.x - leftEyePosition.x) / 2f;
+      float centerY = Math.max(rightEyePosition.y, leftEyePosition.y) - Math.abs(rightEyePosition.y - leftEyePosition.y) / 2f;
+      matrix.setTranslate(centerX - scaledBitmap.getWidth()/2f - scaledBitmap.getWidth()/5f * (float) Math.sin(Math.toRadians(angleY)),
+              (float)(centerY - glassesTopPadding * Math.cos(Math.toRadians(angle))));
+      matrix.postRotate(angle, centerX, centerY);
 
-    Log.d("QQQ", "newLeft=" + glassesWidthSidePadding * Math.cos(Math.toRadians(angle)) + " newTop=" + glassesWidthSidePadding * Math.sin(Math.toRadians(angle)));
+      matrix.postSkew((float) -Math.sin(Math.toRadians(angleY/2f)), (float) -Math.sin(Math.toRadians(angleY/2f)),
+              centerX, centerY);
+      matrix.postScale((float) Math.cos(Math.toRadians(angleY)), (float) Math.cos(Math.toRadians(angleY)),
+              centerX, centerY);
 
-    float centerX = rightEyePosition.x - (rightEyePosition.x - leftEyePosition.x) / 2f;
-    float centerY = Math.max(rightEyePosition.y, leftEyePosition.y) - Math.abs(rightEyePosition.y - leftEyePosition.y) / 2f;
-    matrix.setTranslate(centerX - scaledBitmap.getWidth()/2f, (float)(centerY - glassesTopPadding * Math.cos(Math.toRadians(angle))));
-    matrix.postRotate(angle, centerX, centerY);
-//    matrix.postTranslate(newLeft, newTop);
-    canvas.drawBitmap(Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), new Matrix(), true), matrix, null);
-  }
-
-
-  private void drawNose(Canvas canvas,
-                        PointF noseBasePosition,
-                        PointF leftEyePosition, PointF rightEyePosition,
-                        float faceWidth) {
-    final float NOSE_FACE_WIDTH_RATIO = (float)(1 / 5.0);
-    float noseWidth = faceWidth * NOSE_FACE_WIDTH_RATIO;
-    int left = (int)(noseBasePosition.x - (noseWidth / 2));
-    int right = (int)(noseBasePosition.x + (noseWidth / 2));
-    int top = (int)(leftEyePosition.y + rightEyePosition.y) / 2;
-    int bottom = (int)noseBasePosition.y;
-
-    mPigNoseGraphic.setBounds(left, top, right, bottom);
-    mPigNoseGraphic.draw(canvas);
-  }
-
-  private void drawMustache(Canvas canvas,
-                            PointF noseBasePosition,
-                            PointF mouthLeftPosition, PointF mouthRightPosition) {
-    int left = (int)mouthLeftPosition.x;
-    int top = (int)noseBasePosition.y;
-    int right = (int)mouthRightPosition.x;
-    int bottom = (int)Math.min(mouthLeftPosition.y, mouthRightPosition.y);
-
-    // We need to check which camera is being used because the mustache graphic's bounds
-    // are based on the left and right corners of the mouth, from the subject's persepctive.
-    // With the front camera, the subject's left will be on the *left* side of the view,
-    // but with the back camera, the subject's left will be on the *right* side.
-    if (mIsFrontFacing) {
-      mMustacheGraphic.setBounds(left, top, right, bottom);
-    } else {
-      mMustacheGraphic.setBounds(right, top, left, bottom);
+      canvas.drawBitmap(Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), new Matrix(), true), matrix, null);
     }
-    mMustacheGraphic.draw(canvas);
-  }
-
-  private void drawHat(Canvas canvas, PointF facePosition, float faceWidth, float faceHeight, PointF noseBasePosition) {
-    final float HAT_FACE_WIDTH_RATIO = (float)(1.0 / 4.0);
-    final float HAT_FACE_HEIGHT_RATIO = (float)(1.0 / 6.0);
-    final float HAT_CENTER_Y_OFFSET_FACTOR = (float)(1.0 / 8.0);
-
-    float hatCenterY = facePosition.y + (faceHeight * HAT_CENTER_Y_OFFSET_FACTOR);
-    float hatWidth = faceWidth * HAT_FACE_WIDTH_RATIO;
-    float hatHeight = faceHeight * HAT_FACE_HEIGHT_RATIO;
-
-    int left = (int)(noseBasePosition.x - (hatWidth / 2));
-    int right = (int)(noseBasePosition.x + (hatWidth / 2));
-    int top = (int)(hatCenterY - (hatHeight / 2));
-    int bottom = (int)(hatCenterY + (hatHeight / 2));
-    mHatGraphic.setBounds(left, top, right, bottom);
-    mHatGraphic.draw(canvas);
   }
 
 }
