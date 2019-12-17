@@ -18,11 +18,14 @@ package com.raywenderlich.facespotter.ui.camera;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import com.google.android.gms.common.images.Size;
 import com.google.android.gms.vision.CameraSource;
@@ -127,8 +130,15 @@ public class CameraSourcePreview extends ViewGroup {
 
   @Override
   protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-    int previewWidth = 800;
-    int previewHeight = 600;
+    WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    Point sizeDisp = new Point();
+    display.getSize(sizeDisp);
+    int width = sizeDisp.x;
+    int height = sizeDisp.y;
+    double ratio = (double) width / height;
+    int previewHeight = 800;
+    int previewWidth = (int) (previewHeight * ratio);
     if (mCameraSource != null) {
       Size size = mCameraSource.getPreviewSize();
       if (size != null) {

@@ -38,13 +38,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -229,9 +232,19 @@ public final class FaceActivity extends AppCompatActivity {
     // but may miss smaller faces, landmarks, or may not correctly detect eyes open/closed in
     // comparison to using higher camera resolutions.  If you have any of these issues, you may
     // want to increase the resolution.
+    WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    Point size = new Point();
+    display.getSize(size);
+    int width = size.x;
+    int height = size.y;
+    double ratio = (double) width / height;
+    int previewHeight = 800;
+    int previewWidth = (int) (previewHeight * ratio);
+
     mCameraSource = new CameraSource.Builder(context, detector)
       .setFacing(facing)
-      .setRequestedPreviewSize(800, 600)
+      .setRequestedPreviewSize(previewWidth, previewHeight)
       .setRequestedFps(30.0f)
       .setAutoFocusEnabled(true)
       .build();
