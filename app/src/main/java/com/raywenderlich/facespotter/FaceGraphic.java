@@ -321,8 +321,11 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
     Log.d("QQQ", "newLeft=" + glassesWidthSidePadding * Math.cos(Math.toRadians(angle)) + " newTop=" + glassesWidthSidePadding * Math.sin(Math.toRadians(angle)));
 
-    matrix.postRotate(angle, 0, 0);
-    matrix.postTranslate(newLeft, newTop);
+    float centerX = rightEyePosition.x - (rightEyePosition.x - leftEyePosition.x) / 2f;
+    float centerY = Math.max(rightEyePosition.y, leftEyePosition.y) - Math.abs(rightEyePosition.y - leftEyePosition.y) / 2f;
+    matrix.setTranslate(centerX - scaledBitmap.getWidth()/2f, (float)(centerY - glassesTopPadding * Math.cos(Math.toRadians(angle))));
+    matrix.postRotate(angle, centerX, centerY);
+//    matrix.postTranslate(newLeft, newTop);
     canvas.drawBitmap(Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), new Matrix(), true), matrix, null);
   }
 
